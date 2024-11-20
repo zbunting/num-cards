@@ -34,6 +34,22 @@ async function showNumberRace(nums) {
 /** Show information (trivia/error messages) for all requests. */
 
 async function showNumberAll(nums) {
+  const promises = nums.map(num => fetch(`${BASE_URL}/${num}?json`));
+  const resps = await Promise.allSettled(promises);
+
+  console.log({ resps });
+
+  const jFiltered = resps.filter(resp => {
+    return resp.status === 'fulfilled' && resp.value.ok
+  });
+  const jPromises = jFiltered.map(resp => resp.value.json());
+  const data = await Promise.all(jPromises);
+
+  console.log({ data });
+
+  for (const trivia of data) {
+    console.log(trivia.text);
+  }
 }
 
 /** Call all three functions one-after-another. */
@@ -41,6 +57,7 @@ async function showNumberAll(nums) {
 async function main() {
   await showNumberTrivia(25);
   await showNumberRace([3, 6, 99, 30]);
+  await showNumberAll([3, 'a', 6]);
 }
 
 await main();
